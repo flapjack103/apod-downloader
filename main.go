@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// ImageDir sets the download location for our space images
-	ImageDir = "/tmp/nasa_images/go"
+	// ImageDir sets the download location for our image data
+	ImageDir = "/tmp/apod/images"
 	// AppNamespace is the prefix for all metrics
 	AppNamespace = "apod"
 )
@@ -28,7 +28,7 @@ func initStatsd() (*statsd.Client, error) {
 }
 
 func main() {
-	fmt.Println("Getting started.")
+	fmt.Println("Getting started")
 
 	// defaults
 	downloadCount := 10
