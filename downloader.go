@@ -37,10 +37,10 @@ func (d *Downloader) Run() {
 		}
 
 		// collect some stats
-		log.Infof("downloaded %s", imageURL)
 		sec := time.Now().Sub(now).Seconds()
-		d.stats.Incr("download.count", nil, 1)
-		d.stats.Gauge("download.duration", sec, nil, 1)
+		log.Infof("downloaded %s in %.2fs", imageURL, sec)
+		// d.stats.Incr("download.count", nil, 1)
+		// d.stats.Gauge("download.duration", sec, nil, 1)
 	}
 }
 

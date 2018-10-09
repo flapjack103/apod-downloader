@@ -38,14 +38,14 @@ func main() {
 	stats, err := initStatsd()
 	if err != nil {
 		log.Criticalf("Error initializing stats client: %s", err)
-		return
+		os.Exit(1)
 	}
 
 	cli := NewAPODClient(apiKey)
 	urls, err := cli.FetchImageURLs(downloadCount)
 	if err != nil {
 		log.Criticalf("Error fetching image urls: %s", err)
-		return
+		os.Exit(1)
 	}
 
 	start := time.Now()
@@ -56,5 +56,6 @@ func main() {
 	p.Close()
 
 	td := time.Now().Sub(start).Seconds()
-	stats.Gauge("fetch.duration", td, nil, 1)
+	log.Infof("Fetch took %.2fs", td)
+	//stats.Gauge("fetch.duration", td, nil, 1)
 }

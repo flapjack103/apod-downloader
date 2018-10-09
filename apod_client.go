@@ -48,30 +48,32 @@ func NewAPODClient(apiKey string) *APODClient {
 }
 
 // FetchImageURLs returns a list of all image URLs from nDaysAgo
-func (c *APODClient) FetchImageURLs(nDaysAgo int) ([]string, error) {
-	startDate := time.Now().AddDate(0, 0, -nDaysAgo)
+func (c *APODClient) FetchImageURLs(count int) ([]string, error) {
+	var urls []string
+	date := time.Now()
 
 	// make the request
-	resp, err := http.Get(c.buildURL(startDate))
-	if err != nil {
-		return nil, errors.Wrap(err, "error fetching data from APOD API")
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Received non-200 status code %d", resp.StatusCode)
-	}
+	for i := 0; len(urls) < count; i++ {
+		date = date.AddDate(0, 0, -i)
+		resp, err := http.Get(c.buildURL(date))
+		if err != nil {
+			return nil, errors.Wrap(err, "error fetching data from APOD API")
+		}
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("Received non-200 status code %d", resp.StatusCode)
+		}
 
-	// parse the response
-	var imageMeta []APODImageMeta
-	if err := json.NewDecoder(resp.Body).Decode(&imageMeta); err != nil {
-		return nil, errors.Wrap(err, "error parsing API response")
-	}
+		// parse the response
+		var imageMeta APODImageMeta
+		if err := json.NewDecoder(resp.Body).Decode(&imageMeta); err != nil {
+			return nil, errors.Wrap(err, "error parsing API response")
+		}
 
-	var urls []string
-	for _, img := range imageMeta {
-		if img.MediaType != APODTypeImage {
+		if imageMeta.MediaType != APODTypeImage {
+			// we only want images
 			continue
 		}
-		urls = append(urls, img.URL)
+		urls = append(urls, imageMeta.URL)
 	}
 
 	return urls, nil
@@ -81,6 +83,6 @@ func (c *APODClient) FetchImageURLs(nDaysAgo int) ([]string, error) {
 func (c *APODClient) buildURL(startDate time.Time) string {
 	v := url.Values{}
 	v.Add("api_key", c.APIKey)
-	v.Add("start_date", startDate.Format(APODDateFormat))
+	v.Add("date", startDate.Format(APODDateFormat))
 	return fmt.Sprintf("%s?%s", c.URL, v.Encode())
 }
